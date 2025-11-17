@@ -52,9 +52,9 @@ private:
     float jumpForce;
     bool isJumping;
     int health;
+    sf::Vector2f velocity;
 
-public:
-    Player();
+    public : Player();
 
     void move();
     void jump();
