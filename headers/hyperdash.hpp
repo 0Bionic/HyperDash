@@ -48,7 +48,14 @@ public:
 class Player
 {
 private:
+    sf::Texture texture;
     sf::Sprite sprite;
+    int currentFrame;
+    float animationTimer;
+    float frameTime;
+    int frameWidth;
+    int frameHeight;
+    int totalFrames;
     float speed;
     float jumpForce;
     bool isJumping;
@@ -58,8 +65,9 @@ private:
 public:
     Player();
 
-    void move();
+    void move(float direction);
     void jump();
+    void updateAnimation(float deltaTime);
     void update();
     void render(sf::RenderWindow *window);
     void takeDamage();
