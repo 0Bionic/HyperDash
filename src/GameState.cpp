@@ -2,10 +2,10 @@
 #include "background.hpp"
 
 GameState::GameState()
-    : score(0), isRunning(true)
+    : score(0), isRunning(true), gameState(1)
 {
     window = std::make_unique<sf::RenderWindow>(
-        sf::VideoMode(800, 600),
+        sf::VideoMode(1280, 720),
         "HyperDash");
     window->setFramerateLimit(60);
 }
@@ -22,6 +22,7 @@ void GameState::run()
         window->clear(sf::Color::Black);
         background.render(window.get());
         window->display();
+        
     }
 }
 

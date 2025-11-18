@@ -25,6 +25,7 @@ private:
     std::unique_ptr<sf::RenderWindow> window;
     int score;
     bool isRunning;
+    int gameState; // 0: WelcomeScreen, 1: Ingame, 2: GameOver
 
 public:
     GameState();
@@ -54,7 +55,8 @@ private:
     int health;
     sf::Vector2f velocity;
 
-    public : Player();
+public:
+    Player();
 
     void move();
     void jump();
