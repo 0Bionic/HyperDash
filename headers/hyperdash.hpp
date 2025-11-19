@@ -127,6 +127,7 @@ class Coin
 {
 private:
     sf::Sprite sprite;
+    sf::Texture texture;
     int value;
 
 public:
@@ -134,7 +135,6 @@ public:
 
     void update();
     void render(sf::RenderWindow *window);
-    void onCollect();
 
     sf::Sprite &getSprite() { return sprite; }
     int getValue() const { return value; }
