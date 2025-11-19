@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <ctime>
+#include <iostream>
 
 GameState::GameState()
     : score(0), isRunning(true), gameState(1)
@@ -21,8 +22,10 @@ void GameState::run()
 {
     Background background("sprites/background.png", 2.0f);
     HealthBar healthBar(1000, 40, 250, 20, 9);
+    ScoreDisplay scoreDisplay(30, 40);
     sf::Clock clock;
     float coinSpawnTimer = 0.0f;
+    float scoreIncreaseTimer = 0.0f;
 
     while (isRunning && window->isOpen())
     {
@@ -33,15 +36,31 @@ void GameState::run()
         player->updateAnimation(deltaTime);
         background.update();
         healthBar.update(player->getHealth());
+        scoreDisplay.update(score);
 
-        // Coin spawning logic (35% chance)
+        // Coin spawning logic (75% chance)
         coinSpawnTimer += deltaTime;
         if (coinSpawnTimer >= 1.5f)
         {
             coinSpawnTimer = 0.0f;
-            if (rand() % 100 < 75)
+            if (rand() % 100 < 45)
             {
                 coins.push_back(std::make_unique<Coin>());
+                std::cout << "coin made";
+            }
+        }
+
+        scoreIncreaseTimer += deltaTime;
+        if (scoreIncreaseTimer >= 0.75f)
+        {
+            scoreIncreaseTimer = 0.0f;
+            if (score % 250 == 0 && score != 0)
+            {
+                addScore(25);
+            }
+            else
+            {
+                addScore(10);
             }
         }
 
@@ -65,6 +84,7 @@ void GameState::run()
         window->clear(sf::Color::Black);
         background.render(window.get());
         player->render(window.get());
+        scoreDisplay.render(window.get());
 
         for (auto &coin : coins)
         {
@@ -94,16 +114,18 @@ void GameState::handleInput()
                 isRunning = false;
                 window->close();
             }
-            if (event.key.code == sf::Keyboard::Space ||
-                event.key.code == sf::Keyboard::W ||
+            if (event.key.code == sf::Keyboard::W ||
                 event.key.code == sf::Keyboard::Up)
             {
                 player->jump();
             }
+            if (event.key.code == sf::Keyboard::H)
+            {
+                player->takeDamage();
+            }
         }
     }
 
-    // Continuous movement
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) ||
         sf::Keyboard::isKeyPressed(sf::Keyboard::A))
     {
@@ -125,10 +147,9 @@ void GameState::checkCollisions()
 {
     sf::FloatRect playerBounds = player->getSprite().getGlobalBounds();
 
-    // Check coin collisions
     for (auto it = coins.begin(); it != coins.end();)
     {
-        if (playerBounds.intersects((*it)->getSprite().getGlobalBounds()))
+        if (playerBounds.intersects((*it)->getHitbox()))
         {
             addScore((*it)->getValue());
             it = coins.erase(it);

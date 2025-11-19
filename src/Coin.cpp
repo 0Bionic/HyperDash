@@ -1,5 +1,6 @@
 #include "hyperdash.hpp"
 #include <cstdlib>
+#include <iostream>
 
 Coin::Coin()
 {
@@ -7,17 +8,31 @@ Coin::Coin()
 
     if (!texture.loadFromFile("sprites/coinSprite.png"))
     {
+        std::cout << "fail";
     }
 
     sprite.setTexture(texture);
+    sprite.setScale(0.1f, 0.1f);
 
-    // Random Y position between jump height (200) and ground (400)
-    float randomY = 200 + static_cast<float>(rand() % 201);
+    float randomY = 400 + static_cast<float>(rand() % 100);
 
     // Spawn ahead of screen
     float randomX = 1280 + static_cast<float>(rand() % 200);
 
     sprite.setPosition(randomX, randomY);
+}
+
+sf::FloatRect Coin::getHitbox() const
+{
+    sf::FloatRect bounds = sprite.getGlobalBounds();
+
+    float shrinkFactor = 0.5f;
+    bounds.left += bounds.width * shrinkFactor / 2.f;
+    bounds.top += bounds.height * shrinkFactor / 2.f;
+    bounds.width *= (1.f - shrinkFactor);
+    bounds.height *= (1.f - shrinkFactor);
+
+    return bounds;
 }
 
 void Coin::update()

@@ -90,3 +90,51 @@ void HealthBar::render(sf::RenderWindow *window)
     window->draw(background);
     window->draw(bar);
 }
+
+// Scoring
+
+ScoreDisplay::ScoreDisplay(float x, float y)
+    : currentScore(0), position(x, y)
+{
+
+    if (!font.loadFromFile("fonts/PressStart2P-Regular.ttf"))
+    {
+    }
+
+    // Setup score label (e.g., "Score:")
+    scoreLabel.setFont(font);
+    scoreLabel.setString("Score:");
+    scoreLabel.setCharacterSize(24);
+    scoreLabel.setFillColor(sf::Color::White);
+    scoreLabel.setPosition(x, y);
+
+    // Setup score text (the actual number)
+    scoreText.setFont(font);
+    scoreText.setString("0");
+    scoreText.setCharacterSize(26);
+    scoreText.setFillColor(sf::Color::Yellow);
+    scoreText.setPosition(x + 140, y);
+}
+
+void ScoreDisplay::update(int score)
+{
+    currentScore = score;
+    scoreText.setString(std::to_string(currentScore));
+}
+
+void ScoreDisplay::render(sf::RenderWindow *window)
+{
+    window->draw(background);
+    window->draw(scoreLabel);
+    window->draw(scoreText);
+}
+
+void ScoreDisplay::setPosition(float x, float y)
+{
+    position.x = x;
+    position.y = y;
+
+    scoreLabel.setPosition(x, y);
+    scoreText.setPosition(x + 80, y - 4);
+    background.setPosition(x - 10, y - 5);
+}

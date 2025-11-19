@@ -23,7 +23,7 @@ Player::Player()
     sprite.setScale(0.5f, 0.5f);
 
     speed = 300.0f;
-    jumpForce = -500.0f;
+    jumpForce = -700.0f;
     isJumping = false;
     health = 9;
 }

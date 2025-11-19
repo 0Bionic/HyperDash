@@ -138,6 +138,7 @@ public:
 
     sf::Sprite &getSprite() { return sprite; }
     int getValue() const { return value; }
+    sf::FloatRect getHitbox() const;
 };
 
 // PowerUp Class

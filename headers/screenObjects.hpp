@@ -1,5 +1,5 @@
-#ifndef BACKGROUND_H
-#define BACKGROUND_H
+#ifndef SCREENOBJECT_H
+#define SCREENOBJECT_H
 
 #include <SFML/Graphics.hpp>
 #include <string>
@@ -36,6 +36,25 @@ public:
 
     void update(int currentHealth);
     void render(sf::RenderWindow *window);
+};
+
+class ScoreDisplay
+{
+private:
+    sf::Font font;
+    sf::Text scoreText;
+    sf::Text scoreLabel;
+    sf::RectangleShape background;
+    int currentScore;
+    sf::Vector2f position;
+
+public:
+    ScoreDisplay(float x, float y);
+
+    void update(int score);
+    void render(sf::RenderWindow *window);
+    void setPosition(float x, float y);
+    int getScore() const { return currentScore; }
 };
 
 #endif
