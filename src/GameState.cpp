@@ -1,5 +1,5 @@
 #include "hyperdash.hpp"
-#include "background.hpp"
+#include "screenObjects.hpp"
 
 GameState::GameState()
     : score(0), isRunning(true), gameState(1)
@@ -15,6 +15,7 @@ GameState::GameState()
 void GameState::run()
 {
     Background background("sprites/background.png", 2.0f);
+    HealthBar healthBar(1000, 40, 250, 15, 9);
     sf::Clock clock;
 
     while (isRunning && window->isOpen())
@@ -25,10 +26,12 @@ void GameState::run()
         update();
         player->updateAnimation(deltaTime);
         background.update();
+        healthBar.update(player->getHealth());
 
         window->clear(sf::Color::Black);
         background.render(window.get());
         player->render(window.get());
+        healthBar.render(window.get());
         window->display();
     }
 }
@@ -57,6 +60,10 @@ void GameState::handleInput()
             {
                 player->jump();
             }
+        }
+        if (event.key.code == sf::Keyboard::H)
+        {
+            player->takeDamage(); // temporary
         }
     }
 

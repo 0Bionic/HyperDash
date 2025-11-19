@@ -21,4 +21,21 @@ public:
     float getSpeed() const { return scrollSpeed; }
 };
 
+class HealthBar
+{
+private:
+    sf::RectangleShape background;
+    sf::RectangleShape bar;
+    sf::Font font;
+    sf::Text label;
+    float maxWidth;
+    int maxHealth;
+
+public:
+    HealthBar(float x, float y, float width, float height, int maxHealth);
+
+    void update(int currentHealth);
+    void render(sf::RenderWindow *window);
+};
+
 #endif

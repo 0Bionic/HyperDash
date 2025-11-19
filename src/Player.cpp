@@ -25,7 +25,7 @@ Player::Player()
     speed = 300.0f;
     jumpForce = -500.0f;
     isJumping = false;
-    health = 3;
+    health = 9;
 }
 
 void Player::updateAnimation(float deltaTime)

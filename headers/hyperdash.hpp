@@ -33,7 +33,6 @@ public:
 
     void run();
     void update();
-    void render();
     void handleInput();
     void checkCollisions();
     void reset();
@@ -57,6 +56,7 @@ private:
     int frameHeight;
     int totalFrames;
     float speed;
+    float damage;
     float jumpForce;
     bool isJumping;
     int health;
@@ -69,6 +69,7 @@ public:
     void jump();
     void updateAnimation(float deltaTime);
     void update();
+    void shoot();
     void render(sf::RenderWindow *window);
     void takeDamage();
 
