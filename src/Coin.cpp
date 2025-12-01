@@ -1,9 +1,12 @@
 #include "hyperdash.hpp"
+
 #include <cstdlib>
+#include <ctime>
 #include <iostream>
 
 Coin::Coin()
 {
+    srand(static_cast<unsigned>(time(0)));
     value = 10;
 
     if (!texture.loadFromFile("sprites/coinSprite.png"))

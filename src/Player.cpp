@@ -68,6 +68,18 @@ void Player::jump()
     }
 }
 
+void Player::ground()
+{
+    if (isJumping)
+    {
+        sf::Vector2f pos = sprite.getPosition();
+        pos.y = 400;
+        velocity.y = 0.0f;
+        isJumping = false;
+        sprite.setPosition(pos);
+    }
+}
+
 void Player::update()
 {
     // Apply gravity

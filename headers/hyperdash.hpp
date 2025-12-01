@@ -35,6 +35,8 @@ public:
     void update();
     void handleInput();
     void checkCollisions();
+    void renderStart();
+    void renderGameOver();
     void reset();
 
     Player *getPlayer() { return player.get(); }
@@ -67,6 +69,7 @@ public:
 
     void move(float direction);
     void jump();
+    void ground();
     void updateAnimation(float deltaTime);
     void update();
     void shoot();

@@ -46,7 +46,6 @@ void GameState::run()
             if (rand() % 100 < 45)
             {
                 coins.push_back(std::make_unique<Coin>());
-                std::cout << "coin made";
             }
         }
 
@@ -122,6 +121,12 @@ void GameState::handleInput()
             if (event.key.code == sf::Keyboard::H)
             {
                 player->takeDamage();
+                addScore(-25);
+            }
+            if (event.key.code == sf::Keyboard::Down ||
+                event.key.code == sf::Keyboard::S)
+            {
+                player->ground();
             }
         }
     }
@@ -129,7 +134,7 @@ void GameState::handleInput()
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) ||
         sf::Keyboard::isKeyPressed(sf::Keyboard::A))
     {
-        player->move(-1.0f);
+        player->move(-1.25f);
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) ||
         sf::Keyboard::isKeyPressed(sf::Keyboard::D))
