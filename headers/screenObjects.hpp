@@ -57,4 +57,21 @@ public:
     int getScore() const { return currentScore; }
 };
 
+class GameOverScreen
+{
+private:
+    sf::Texture backgroundTexture;
+    sf::Sprite backgroundSprite;
+    sf::Font font;
+    sf::Text gameOverText;
+    sf::Text restartText;
+    float blinkTimer;
+    bool showRestartText;
+
+public:
+    GameOverScreen();
+
+    void update(float deltaTime);
+    void render(sf::RenderWindow *window);
+};
 #endif

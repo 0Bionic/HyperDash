@@ -23,8 +23,10 @@ void GameState::run()
     Background background("sprites/background.png", 2.0f);
     HealthBar healthBar(1000, 40, 250, 20, 9);
     ScoreDisplay scoreDisplay(30, 40);
+    GameOverScreen gameOverScreen;
     sf::Clock clock;
     float coinSpawnTimer = 0.0f;
+    float spikeSpawnTimer = 0.0f;
     float scoreIncreaseTimer = 0.0f;
 
     while (isRunning && window->isOpen())
@@ -32,13 +34,32 @@ void GameState::run()
         float deltaTime = clock.restart().asSeconds();
 
         handleInput();
+
+        // Check if player is dead
+        if (player->getHealth() <= 0)
+        {
+            gameState = 0;
+        }
+
+        if (gameState == 0)
+        {
+            // Game Over state
+            gameOverScreen.update(deltaTime);
+
+            window->clear(sf::Color::Black);
+            gameOverScreen.render(window.get());
+            window->display();
+            continue;
+        }
+
+        // Normal gameplay (gameState == 1)
         update();
         player->updateAnimation(deltaTime);
         background.update();
         healthBar.update(player->getHealth());
         scoreDisplay.update(score);
 
-        // Coin spawning logic (75% chance)
+        // Coin spawning logic (45% chance)
         coinSpawnTimer += deltaTime;
         if (coinSpawnTimer >= 1.5f)
         {
@@ -46,6 +67,17 @@ void GameState::run()
             if (rand() % 100 < 45)
             {
                 coins.push_back(std::make_unique<Coin>());
+            }
+        }
+
+        // Spike spawning logic (40% chance)
+        spikeSpawnTimer += deltaTime;
+        if (spikeSpawnTimer >= 2.0f)
+        {
+            spikeSpawnTimer = 0.0f;
+            if (rand() % 100 < 40)
+            {
+                obstacles.push_back(std::make_unique<Spike>());
             }
         }
 
@@ -69,6 +101,12 @@ void GameState::run()
             coin->update();
         }
 
+        // Update obstacles
+        for (auto &obstacle : obstacles)
+        {
+            obstacle->update();
+        }
+
         checkCollisions();
 
         // Remove coins that went off screen
@@ -80,8 +118,24 @@ void GameState::run()
                            }),
             coins.end());
 
+        // Remove obstacles that went off screen
+        obstacles.erase(
+            std::remove_if(obstacles.begin(), obstacles.end(),
+                           [](const std::unique_ptr<Obstacle> &obstacle)
+                           {
+                               return obstacle->getSprite().getPosition().x < -50;
+                           }),
+            obstacles.end());
+
         window->clear(sf::Color::Black);
         background.render(window.get());
+
+        // Render obstacles (spikes)
+        for (auto &obstacle : obstacles)
+        {
+            obstacle->render(window.get());
+        }
+
         player->render(window.get());
         scoreDisplay.render(window.get());
 
@@ -113,33 +167,50 @@ void GameState::handleInput()
                 isRunning = false;
                 window->close();
             }
-            if (event.key.code == sf::Keyboard::W ||
-                event.key.code == sf::Keyboard::Up)
+
+            // Restart on Enter when game over
+            if (event.key.code == sf::Keyboard::Enter && gameState == 0)
             {
-                player->jump();
+                reset();
+                gameState = 1;
+                return;
             }
-            if (event.key.code == sf::Keyboard::H)
+
+            // Gameplay controls (only when gameState == 1)
+            if (gameState == 1)
             {
-                player->takeDamage();
-                addScore(-25);
-            }
-            if (event.key.code == sf::Keyboard::Down ||
-                event.key.code == sf::Keyboard::S)
-            {
-                player->ground();
+                if (event.key.code == sf::Keyboard::W ||
+                    event.key.code == sf::Keyboard::Up)
+                {
+                    player->jump();
+                }
+                if (event.key.code == sf::Keyboard::H)
+                {
+                    player->takeDamage();
+                    addScore(-25);
+                }
+                if (event.key.code == sf::Keyboard::Down ||
+                    event.key.code == sf::Keyboard::S)
+                {
+                    player->ground();
+                }
             }
         }
     }
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) ||
-        sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+    // Movement controls (only when gameState == 1)
+    if (gameState == 1)
     {
-        player->move(-1.25f);
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) ||
-        sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-    {
-        player->move(1.0f);
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) ||
+            sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+        {
+            player->move(-1.25f);
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) ||
+            sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+        {
+            player->move(1.0f);
+        }
     }
 }
 
@@ -152,6 +223,7 @@ void GameState::checkCollisions()
 {
     sf::FloatRect playerBounds = player->getSprite().getGlobalBounds();
 
+    // Check coin collisions
     for (auto it = coins.begin(); it != coins.end();)
     {
         if (playerBounds.intersects((*it)->getHitbox()))
@@ -162,6 +234,21 @@ void GameState::checkCollisions()
         else
         {
             ++it;
+        }
+    }
+
+    // Check spike collisions (only damage once per spike)
+    for (auto &obstacle : obstacles)
+    {
+        Spike *spike = dynamic_cast<Spike *>(obstacle.get());
+        if (spike && !spike->getHasHit())
+        {
+            if (spike->checkCollision(player.get()))
+            {
+                player->takeDamage();
+                addScore(-25);
+                spike->setHasHit(true);
+            }
         }
     }
 }

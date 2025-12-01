@@ -112,6 +112,7 @@ class Obstacle
 protected:
     sf::Sprite sprite;
     sf::Vector2f position;
+    sf::Texture texture;
 
 public:
     Obstacle();
@@ -167,6 +168,9 @@ public:
 // Spike Class (Inherites from obstacle)
 class Spike : public Obstacle
 {
+private:
+    bool hasHit;
+
 public:
     Spike();
 
@@ -174,6 +178,8 @@ public:
     void update() override;
     void render(sf::RenderWindow *window) override;
     bool checkCollision(Player *player) override;
+    bool getHasHit() const { return hasHit; }
+    void setHasHit(bool hit) { hasHit = hit; }
 };
 
 // Projectile Class (Inherits from obstacle)

@@ -138,3 +138,54 @@ void ScoreDisplay::setPosition(float x, float y)
     scoreText.setPosition(x + 80, y - 4);
     background.setPosition(x - 10, y - 5);
 }
+
+GameOverScreen::GameOverScreen()
+{
+    if (!backgroundTexture.loadFromFile("sprites/GameOver.png"))
+    {
+    }
+
+    backgroundSprite.setTexture(backgroundTexture);
+    backgroundSprite.setPosition(0, 0);
+
+    if (!font.loadFromFile("fonts/PressStart2P-Regular.ttf"))
+    {
+    }
+
+    gameOverText.setFont(font);
+    gameOverText.setString("GAME OVER");
+    gameOverText.setCharacterSize(48);
+    gameOverText.setFillColor(sf::Color::Red);
+    gameOverText.setPosition(400, 250);
+
+    restartText.setFont(font);
+    restartText.setString("PRESS ENTER TO RESTART");
+    restartText.setCharacterSize(20);
+    restartText.setFillColor(sf::Color::White);
+    restartText.setPosition(400, 400);
+
+    blinkTimer = 0.0f;
+    showRestartText = true;
+}
+
+void GameOverScreen::update(float deltaTime)
+{
+    blinkTimer += deltaTime;
+
+    if (blinkTimer >= 0.5f)
+    {
+        blinkTimer = 0.0f;
+        showRestartText = !showRestartText;
+    }
+}
+
+void GameOverScreen::render(sf::RenderWindow *window)
+{
+    window->draw(backgroundSprite);
+    window->draw(gameOverText);
+
+    if (showRestartText)
+    {
+        window->draw(restartText);
+    }
+}
