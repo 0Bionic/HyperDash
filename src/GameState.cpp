@@ -31,6 +31,7 @@ void GameState::run()
     float coinSpawnTimer = 0.0f;
     float spikeSpawnTimer = 0.0f;
     float scoreIncreaseTimer = 0.0f;
+    float powerUpSpawnTimer = 0.0f;
 
     while (isRunning && window->isOpen())
     {
@@ -60,8 +61,8 @@ void GameState::run()
         float currentSpeed = baseScrollSpeed * (1.0f + (elapsedTime / 60.0f));
 
         // Normal gameplay (gameState == 1)
-        player->updateAnimation(deltaTime);
         player->update(deltaTime);
+        player->updateAnimation(deltaTime);
         background.setSpeed(currentSpeed);
         background.update();
         healthBar.update(player->getHealth());
@@ -82,7 +83,7 @@ void GameState::run()
 
         // Spike spawning logic (40% chance)
         spikeSpawnTimer += deltaTime;
-        if (spikeSpawnTimer >= 2.0f)
+        if (spikeSpawnTimer >= 3.0f)
         {
             spikeSpawnTimer = 0.0f;
             if (rand() % 100 < 40)
@@ -90,6 +91,18 @@ void GameState::run()
                 auto spike = std::make_unique<Spike>();
                 spike->setScrollSpeed(currentSpeed);
                 obstacles.push_back(std::move(spike));
+            }
+        }
+
+        powerUpSpawnTimer += deltaTime;
+        if (!player->getIsInvincible() && powerUpSpawnTimer >= 5.0f)
+        {
+            powerUpSpawnTimer = 0.0f;
+            if (rand() % 100 < 25)
+            {
+                auto newPowerUp = std::make_unique<PowerUp>();
+                newPowerUp->setScrollSpeed(currentSpeed);
+                powerUp.push_back(std::move(newPowerUp));
             }
         }
 
@@ -124,6 +137,13 @@ void GameState::run()
             obstacle->update();
         }
 
+        // Update power-ups
+        for (auto &pu : powerUp)
+        {
+            pu->setScrollSpeed(currentSpeed);
+            pu->update();
+        }
+
         checkCollisions();
 
         // Remove coins that went off screen
@@ -144,6 +164,15 @@ void GameState::run()
                            }),
             obstacles.end());
 
+        // Remove power-ups that went off screen or are active (collected)
+        powerUp.erase(
+            std::remove_if(powerUp.begin(), powerUp.end(),
+                           [](const std::unique_ptr<PowerUp> &pu)
+                           {
+                               return pu->getSprite().getPosition().x < -50 || pu->getIsActive();
+                           }),
+            powerUp.end());
+
         window->clear(sf::Color::Black);
         background.render(window.get());
 
@@ -151,6 +180,12 @@ void GameState::run()
         for (auto &obstacle : obstacles)
         {
             obstacle->render(window.get());
+        }
+
+        // Render power-ups
+        for (auto &pu : powerUp)
+        {
+            pu->render(window.get());
         }
 
         player->render(window.get());
@@ -258,9 +293,23 @@ void GameState::checkCollisions()
             if (spike->checkCollision(player.get()))
             {
                 player->takeDamage();
-                addScore(-25);
+                if (!player->getIsInvincible())
+                {
+                    addScore(-25);
+                }
                 spike->setHasHit(true);
             }
+        }
+    }
+
+    // Check power-up collisions
+    for (auto &pu : powerUp)
+    {
+        if (!pu->getIsActive() && playerBounds.intersects(pu->getHitbox()))
+        {
+            pu->activate();
+            player->setInvincible(true, pu->getDuration());
+            addScore(50); // Bonus points for collecting power-up
         }
     }
 }
@@ -272,4 +321,5 @@ void GameState::reset()
     enemies.clear();
     obstacles.clear();
     coins.clear();
+    powerUp.clear();
 }
