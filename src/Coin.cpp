@@ -1,25 +1,21 @@
 #include "hyperdash.hpp"
-
 #include <cstdlib>
-#include <ctime>
 #include <iostream>
 
 Coin::Coin()
 {
-    srand(static_cast<unsigned>(time(0)));
-    value = 10;
+    value = 20;
+    scrollSpeed = 2.0f;
 
     if (!texture.loadFromFile("sprites/coinSprite.png"))
     {
-        std::cout << "fail";
+        std::cout << "Failed to load coin sprite!" << std::endl;
     }
 
     sprite.setTexture(texture);
-    sprite.setScale(0.1f, 0.1f);
+    sprite.setScale(0.0625f, 0.0625f);
 
-    float randomY = 400 + static_cast<float>(rand() % 100);
-
-    // Spawn ahead of screen
+    float randomY = 300 + static_cast<float>(rand() % 81);
     float randomX = 1280 + static_cast<float>(rand() % 200);
 
     sprite.setPosition(randomX, randomY);
@@ -40,7 +36,7 @@ sf::FloatRect Coin::getHitbox() const
 
 void Coin::update()
 {
-    sprite.move(-5.0f, 0.0f);
+    sprite.move(-scrollSpeed, 0.0f);
 }
 
 void Coin::render(sf::RenderWindow *window)

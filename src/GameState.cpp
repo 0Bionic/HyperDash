@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
+#include <cmath>
 
 GameState::GameState()
     : score(0), isRunning(true), gameState(1)
@@ -20,11 +21,13 @@ GameState::GameState()
 
 void GameState::run()
 {
-    Background background("sprites/background.png", 2.0f);
+    float baseScrollSpeed = 2.0f;
+    Background background("sprites/background.png", baseScrollSpeed);
     HealthBar healthBar(1000, 40, 250, 20, 9);
     ScoreDisplay scoreDisplay(30, 40);
     GameOverScreen gameOverScreen;
     sf::Clock clock;
+    sf::Clock gameTimer;
     float coinSpawnTimer = 0.0f;
     float spikeSpawnTimer = 0.0f;
     float scoreIncreaseTimer = 0.0f;
@@ -32,6 +35,7 @@ void GameState::run()
     while (isRunning && window->isOpen())
     {
         float deltaTime = clock.restart().asSeconds();
+        float elapsedTime = gameTimer.getElapsedTime().asSeconds();
 
         handleInput();
 
@@ -52,9 +56,13 @@ void GameState::run()
             continue;
         }
 
+        // Calculate current speed (increases gradually over time)
+        float currentSpeed = baseScrollSpeed * (1.0f + (elapsedTime / 60.0f));
+
         // Normal gameplay (gameState == 1)
-        update();
         player->updateAnimation(deltaTime);
+        player->update(deltaTime);
+        background.setSpeed(currentSpeed);
         background.update();
         healthBar.update(player->getHealth());
         scoreDisplay.update(score);
@@ -66,7 +74,9 @@ void GameState::run()
             coinSpawnTimer = 0.0f;
             if (rand() % 100 < 45)
             {
-                coins.push_back(std::make_unique<Coin>());
+                auto coin = std::make_unique<Coin>();
+                coin->setScrollSpeed(currentSpeed);
+                coins.push_back(std::move(coin));
             }
         }
 
@@ -77,7 +87,9 @@ void GameState::run()
             spikeSpawnTimer = 0.0f;
             if (rand() % 100 < 40)
             {
-                obstacles.push_back(std::make_unique<Spike>());
+                auto spike = std::make_unique<Spike>();
+                spike->setScrollSpeed(currentSpeed);
+                obstacles.push_back(std::move(spike));
             }
         }
 
@@ -95,15 +107,20 @@ void GameState::run()
             }
         }
 
-        // Update coins
+        // Update existing coins and obstacles with current speed
         for (auto &coin : coins)
         {
+            coin->setScrollSpeed(currentSpeed);
             coin->update();
         }
 
-        // Update obstacles
         for (auto &obstacle : obstacles)
         {
+            Spike *spike = dynamic_cast<Spike *>(obstacle.get());
+            if (spike)
+            {
+                spike->setScrollSpeed(currentSpeed);
+            }
             obstacle->update();
         }
 
@@ -212,11 +229,6 @@ void GameState::handleInput()
             player->move(1.0f);
         }
     }
-}
-
-void GameState::update()
-{
-    player->update();
 }
 
 void GameState::checkCollisions()

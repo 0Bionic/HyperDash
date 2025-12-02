@@ -1,4 +1,5 @@
 #include "hyperdash.hpp"
+#include <cmath>
 
 Player::Player()
 {
@@ -26,6 +27,11 @@ Player::Player()
     jumpForce = -700.0f;
     isJumping = false;
     health = 9;
+
+    // Invincibility initialization
+    isInvincible = false;
+    invincibilityTimer = 0.0f;
+    invincibilityDuration = 0.0f;
 }
 
 void Player::updateAnimation(float deltaTime)
@@ -80,13 +86,13 @@ void Player::ground()
     }
 }
 
-void Player::update()
+void Player::update(float deltaTime)
 {
     // Apply gravity
-    velocity.y += 1500.0f * 0.016f;
+    velocity.y += 1500.0f * deltaTime;
 
     sf::Vector2f pos = sprite.getPosition();
-    pos.y += velocity.y * 0.016f;
+    pos.y += velocity.y * deltaTime;
     sprite.setPosition(pos);
 
     // Ground check
@@ -97,6 +103,18 @@ void Player::update()
         isJumping = false;
         sprite.setPosition(pos);
     }
+
+    // Handle invincibility
+    if (isInvincible)
+    {
+        invincibilityTimer += deltaTime;
+
+        // Check if invincibility has expired
+        if (invincibilityTimer >= invincibilityDuration)
+        {
+            setInvincible(false);
+        }
+    }
 }
 
 void Player::render(sf::RenderWindow *window)
@@ -106,7 +124,29 @@ void Player::render(sf::RenderWindow *window)
 
 void Player::takeDamage()
 {
+    // Don't take damage if invincible
+    if (isInvincible)
+        return;
+
     health--;
     if (health < 0)
         health = 0;
+}
+
+void Player::setInvincible(bool invincible, float duration)
+{
+    isInvincible = invincible;
+    invincibilityDuration = duration;
+    invincibilityTimer = 0.0f;
+
+    if (invincible)
+    {
+        // Apply cyan tint
+        sprite.setColor(sf::Color(0, 255, 255, 255));
+    }
+    else
+    {
+        // Reset to normal color
+        sprite.setColor(sf::Color(255, 255, 255, 255));
+    }
 }

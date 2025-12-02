@@ -25,7 +25,7 @@ private:
     std::unique_ptr<sf::RenderWindow> window;
     int score;
     bool isRunning;
-    int gameState; // 0: WelcomeScreen, 1: Ingame, 2: GameOver
+    int gameState; // 0: GameOver, 1: Ingame
 
 public:
     GameState();
@@ -35,8 +35,6 @@ public:
     void update();
     void handleInput();
     void checkCollisions();
-    void renderStart();
-    void renderGameOver();
     void reset();
 
     Player *getPlayer() { return player.get(); }
@@ -63,6 +61,9 @@ private:
     bool isJumping;
     int health;
     sf::Vector2f velocity;
+    bool isInvincible;
+    float invincibilityTimer;
+    float invincibilityDuration;
 
 public:
     Player();
@@ -71,7 +72,7 @@ public:
     void jump();
     void ground();
     void updateAnimation(float deltaTime);
-    void update();
+    void update(float deltaTime);
     void shoot();
     void render(sf::RenderWindow *window);
     void takeDamage();
@@ -79,6 +80,9 @@ public:
     sf::Sprite &getSprite() { return sprite; }
     int getHealth() const { return health; }
     bool getIsJumping() const { return isJumping; }
+
+    void setInvincible(bool invincible, float duration = 0.0f);
+    bool getIsInvincible() const { return isInvincible; }
 };
 
 // Enemy Class
@@ -118,7 +122,6 @@ public:
     Obstacle();
     virtual ~Obstacle() = default;
 
-    // virtual functions
     virtual void update() = 0;
     virtual void render(sf::RenderWindow *window) = 0;
     virtual bool checkCollision(Player *player) = 0;
@@ -133,12 +136,14 @@ private:
     sf::Sprite sprite;
     sf::Texture texture;
     int value;
+    float scrollSpeed;
 
 public:
     Coin();
 
     void update();
     void render(sf::RenderWindow *window);
+    void setScrollSpeed(float speed) { scrollSpeed = speed; }
 
     sf::Sprite &getSprite() { return sprite; }
     int getValue() const { return value; }
@@ -150,19 +155,23 @@ class PowerUp
 {
 private:
     sf::Sprite sprite;
+    sf::Texture texture;
     bool isActive;
     float duration;
+    float scrollSpeed;
 
 public:
     PowerUp();
-
     void spawn();
     void activate();
     void update();
     void render(sf::RenderWindow *window);
+    void setScrollSpeed(float speed) { scrollSpeed = speed; }
 
     sf::Sprite &getSprite() { return sprite; }
     bool getIsActive() const { return isActive; }
+    float getDuration() const { return duration; }
+    sf::FloatRect getHitbox() const;
 };
 
 // Spike Class (Inherites from obstacle)
@@ -170,16 +179,19 @@ class Spike : public Obstacle
 {
 private:
     bool hasHit;
+    float scrollSpeed;
 
 public:
     Spike();
 
-    // Override pure virtual functions
     void update() override;
+    void setScrollSpeed(float speed) { scrollSpeed = speed; }
+    float getScrollSpeed() const { return scrollSpeed; }
     void render(sf::RenderWindow *window) override;
     bool checkCollision(Player *player) override;
     bool getHasHit() const { return hasHit; }
     void setHasHit(bool hit) { hasHit = hit; }
+    sf::FloatRect getHitbox() const;
 };
 
 // Projectile Class (Inherits from obstacle)
@@ -193,7 +205,6 @@ private:
 public:
     Projectile();
 
-    // Override pure virtual functions
     void update() override;
     void render(sf::RenderWindow *window) override;
     bool checkCollision(Player *player) override;
