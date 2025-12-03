@@ -140,5 +140,3 @@ mingw32-make
 ```bash
 mingw32-make run
 ```
-
-```
