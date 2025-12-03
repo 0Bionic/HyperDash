@@ -28,10 +28,12 @@ void GameState::run()
     GameOverScreen gameOverScreen;
     sf::Clock clock;
     sf::Clock gameTimer;
+    sf::Clock shootClock;
     float coinSpawnTimer = 0.0f;
     float spikeSpawnTimer = 0.0f;
     float scoreIncreaseTimer = 0.0f;
     float powerUpSpawnTimer = 0.0f;
+    float shootCooldown = 0.3f;
 
     while (isRunning && window->isOpen())
     {
@@ -39,6 +41,16 @@ void GameState::run()
         float elapsedTime = gameTimer.getElapsedTime().asSeconds();
 
         handleInput();
+
+        // Shooting with cooldown
+        if (gameState == 1 && sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+        {
+            if (shootClock.getElapsedTime().asSeconds() >= shootCooldown)
+            {
+                player->shoot();
+                shootClock.restart();
+            }
+        }
 
         // Check if player is dead
         if (player->getHealth() <= 0)
@@ -83,7 +95,7 @@ void GameState::run()
 
         // Spike spawning logic (40% chance)
         spikeSpawnTimer += deltaTime;
-        if (spikeSpawnTimer >= 3.0f)
+        if (spikeSpawnTimer >= 2.0f)
         {
             spikeSpawnTimer = 0.0f;
             if (rand() % 100 < 40)
@@ -94,11 +106,12 @@ void GameState::run()
             }
         }
 
+        // Power-up spawning logic (15% chance, every 10 seconds)
         powerUpSpawnTimer += deltaTime;
-        if (!player->getIsInvincible() && powerUpSpawnTimer >= 5.0f)
+        if (powerUpSpawnTimer >= 10.0f)
         {
             powerUpSpawnTimer = 0.0f;
-            if (rand() % 100 < 25)
+            if (rand() % 100 < 15)
             {
                 auto newPowerUp = std::make_unique<PowerUp>();
                 newPowerUp->setScrollSpeed(currentSpeed);
@@ -309,7 +322,7 @@ void GameState::checkCollisions()
         {
             pu->activate();
             player->setInvincible(true, pu->getDuration());
-            addScore(50); // Bonus points for collecting power-up
+            addScore(50);
         }
     }
 }

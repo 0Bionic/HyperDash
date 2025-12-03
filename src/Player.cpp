@@ -1,5 +1,6 @@
 #include "hyperdash.hpp"
 #include <cmath>
+#include <cstdlib>
 
 Player::Player()
 {
@@ -115,11 +116,48 @@ void Player::update(float deltaTime)
             setInvincible(false);
         }
     }
+
+    // Update projectiles
+    for (auto &projectile : projectiles)
+    {
+        projectile->update();
+    }
+
+    // Remove off-screen projectiles
+    projectiles.erase(
+        std::remove_if(projectiles.begin(), projectiles.end(),
+                       [](const std::unique_ptr<Projectile> &proj)
+                       {
+                           return proj->getSprite().getPosition().x > 1330;
+                       }),
+        projectiles.end());
+}
+
+void Player::shoot()
+{
+    sf::Vector2f pos = sprite.getPosition();
+
+    // Spawn projectile from the head of the sprite
+    float spawnX = pos.x + (frameWidth * 0.5f);
+    float spawnY = pos.y + (frameHeight * 0.1f);
+
+    // Add variance to y position (-10 to +10 pixels)
+    float yVariance = static_cast<float>((rand() % 21) - 10);
+    spawnY += yVariance;
+
+    auto projectile = std::make_unique<Projectile>(1, sf::Color::Yellow, spawnX, spawnY);
+    projectiles.push_back(std::move(projectile));
 }
 
 void Player::render(sf::RenderWindow *window)
 {
     window->draw(sprite);
+
+    // Render projectiles
+    for (auto &projectile : projectiles)
+    {
+        projectile->render(window);
+    }
 }
 
 void Player::takeDamage()

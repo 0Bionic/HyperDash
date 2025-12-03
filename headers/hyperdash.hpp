@@ -49,21 +49,26 @@ class Player
 private:
     sf::Texture texture;
     sf::Sprite sprite;
+
     int currentFrame;
     float animationTimer;
     float frameTime;
     int frameWidth;
     int frameHeight;
     int totalFrames;
+
     float speed;
     float damage;
     float jumpForce;
     bool isJumping;
     int health;
     sf::Vector2f velocity;
+
     bool isInvincible;
     float invincibilityTimer;
     float invincibilityDuration;
+
+    std::vector<std::unique_ptr<Projectile>> projectiles;
 
 public:
     Player();
@@ -80,7 +85,9 @@ public:
     sf::Sprite &getSprite() { return sprite; }
     int getHealth() const { return health; }
     bool getIsJumping() const { return isJumping; }
+    std::vector<std::unique_ptr<Projectile>> &getProjectiles() { return projectiles; }
 
+    // Invincibility methods
     void setInvincible(bool invincible, float duration = 0.0f);
     bool getIsInvincible() const { return isInvincible; }
 };
@@ -201,9 +208,10 @@ private:
     float speed;
     sf::Vector2f direction;
     int damage;
+    sf::Color projectileColor;
 
 public:
-    Projectile();
+    Projectile(int dmg, sf::Color color, float startX, float startY);
 
     void update() override;
     void render(sf::RenderWindow *window) override;
@@ -211,5 +219,4 @@ public:
 
     int getDamage() const { return damage; }
 };
-
 #endif
