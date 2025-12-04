@@ -127,7 +127,7 @@ HyperDash/
 ### Setup
 1.  Ensure `g++` and `mingw32-make` are added to your System PATH.
 2.  Update the `SFML_PATH` variable in the `Makefile` to point to your local SFML installation directory.
-3.  Ensure the necessary DLLs (`sfml-graphics-2.dll`, `sfml-audio-2.dll`, `openal32.dll`, etc.) are present in the build directory (or add their folder to path NOT RECOMMENDED!).
+3.  Ensure the necessary DLLs (`sfml-graphics-2.dll`, `sfml-audio-2.dll`, `openal32.dll`, etc.) are present in the build directory, or add their folder to PATH (NOT RECOMMENDED!).
 
 ### Compilation
 Open a terminal in the project root and execute:
