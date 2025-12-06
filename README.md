@@ -4,6 +4,8 @@
 
 **HyperDash** is a 2D infinite runner platformer developed in C++ using the SFML library. The project was designed to demonstrate the practical application of Object-Oriented Programming (OOP) principles in a real-time engine environment. The player navigates a procedurally generated environment, dodging obstacles and engaging enemies while managing resources and power-ups.
 
+GitHub Repo: https://github.com/0Bionic/HyperDash
+
 ---
 
 ## Gameplay Features
